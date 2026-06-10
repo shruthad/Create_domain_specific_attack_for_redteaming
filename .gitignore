@@ -1,0 +1,59 @@
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Node / Promptfoo
+node_modules/
+.promptfoo/
+.promptfoo-cache/
+promptfoo-results/
+.npm/
+.garak_config/
+.garak_data/
+.garak_cache/
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.crt
+*.cer
+*.jks
+*.keystore
+credentials.json
+service-account*.json
+*-service-account.json
+google-credentials*.json
+*api_key*
+*apikey*
+*secret*
+*token*
+
+# Local generated scanner/runtime artifacts
+data/generated/garak_reports/
+data/generated/smoke/
+data/generated/*.tmp
+data/generated/*.log
+data/eval_results/
+
+# Notebook/editor artifacts
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/

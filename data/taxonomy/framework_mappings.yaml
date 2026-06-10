@@ -1,0 +1,17 @@
+owasp_top_10_llm:
+- LLM01 Prompt Injection
+- LLM02 Insecure Output Handling
+- LLM03 Training Data Poisoning
+- LLM04 Model Denial of Service
+- LLM05 Supply Chain Vulnerabilities
+- LLM06 Sensitive Information Disclosure
+- LLM07 Insecure Plugin Design
+- LLM08 Excessive Agency
+- LLM09 Overreliance
+- LLM10 Model Theft
+nist_ai_rmf_functions:
+- GOVERN
+- MAP
+- MEASURE
+- MANAGE
+mitre_atlas_note: Mappings are defensive coverage labels used for benchmark organization.

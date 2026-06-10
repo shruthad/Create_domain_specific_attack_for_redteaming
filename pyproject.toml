@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "finance-llm-redteam-benchmark"
+version = "1.0.0"
+description = "Static banking and finance-domain LLM red-team benchmark dataset generator."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.0",
+  "PyYAML>=6.0",
+  "typer>=0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "rapidfuzz>=3.0"]
+external = ["deepteam", "garak"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-p no:rerunfailures"
+pythonpath = ["src"]
+testpaths = ["tests"]
