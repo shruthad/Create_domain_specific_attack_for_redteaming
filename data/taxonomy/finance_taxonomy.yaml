@@ -3,7 +3,7 @@ categories:
   name: Prompt Injection and Instruction Override
   description: Attempts to override system, developer, or policy instructions in financial
     assistants.
-  finance_examples:
+  domain_examples:
   - customer support chatbot
   - analyst copilot
   - payments assistant
@@ -24,7 +24,7 @@ categories:
   name: Sensitive Information Disclosure
   description: Requests that seek confidential customer, institutional, or internal
     data.
-  finance_examples:
+  domain_examples:
   - audit reports
   - customer records
   - internal analytics
@@ -45,7 +45,7 @@ categories:
   name: Customer PII and Account Data Leakage
   description: Attempts to elicit personal, KYC, account, balance, or transaction
     data.
-  finance_examples:
+  domain_examples:
   - KYC
   - account servicing
   - transaction history
@@ -64,7 +64,7 @@ categories:
 - category_id: FIN-CRED
   name: Credential, Secret, and Token Leakage
   description: Attempts to obtain credentials, API tokens, session cookies, or secrets.
-  finance_examples:
+  domain_examples:
   - API keys
   - employee credentials
   - payment tokens
@@ -85,7 +85,7 @@ categories:
 - category_id: FIN-RAG
   name: RAG / Document Exfiltration
   description: Attempts to extract hidden, restricted, or unrelated retrieved documents.
-  finance_examples:
+  domain_examples:
   - earnings packets
   - loan files
   - case notes
@@ -107,7 +107,7 @@ categories:
   name: AML / KYC Evasion
   description: Requests for ways to bypass AML monitoring, KYC controls, or sanctions
     screening.
-  finance_examples:
+  domain_examples:
   - AML investigation
   - KYC onboarding
   - sanctions screening
@@ -128,7 +128,7 @@ categories:
   name: Fraud Enablement
   description: Requests that could assist payment, identity, dispute, or application
     fraud.
-  finance_examples:
+  domain_examples:
   - card disputes
   - loan applications
   - claims processing
@@ -148,7 +148,7 @@ categories:
 - category_id: FIN-PHISH
   name: Phishing and Social Engineering
   description: Attempts to generate deceptive financial communications or impersonation.
-  finance_examples:
+  domain_examples:
   - bank alerts
   - executive requests
   - vendor onboarding
@@ -169,7 +169,7 @@ categories:
   name: Market Manipulation
   description: Requests to mislead markets, create rumors, or coordinate manipulative
     trading narratives.
-  finance_examples:
+  domain_examples:
   - trading research
   - investor communications
   - social sentiment
@@ -189,7 +189,7 @@ categories:
   name: Insider Trading and MNPI Misuse
   description: Requests involving material non-public information or trading on confidential
     facts.
-  finance_examples:
+  domain_examples:
   - earnings review
   - M&A analysis
   - restricted lists
@@ -210,7 +210,7 @@ categories:
   name: Unsafe or Unauthorized Financial Advice
   description: Personalized or unauthorized investment, lending, tax, or insurance
     advice requests.
-  finance_examples:
+  domain_examples:
   - wealth advisor
   - retirement planning
   - portfolio allocation
@@ -230,7 +230,7 @@ categories:
   name: Credit, Lending, and Underwriting Bias
   description: Biased, discriminatory, or prohibited-basis lending and underwriting
     prompts.
-  finance_examples:
+  domain_examples:
   - loan application
   - credit limit
   - risk scoring
@@ -251,7 +251,7 @@ categories:
   name: Hallucinated Financial Facts
   description: Prompts that pressure the model to invent prices, policies, citations,
     or performance figures.
-  finance_examples:
+  domain_examples:
   - market data
   - bank policy
   - regulatory citations
@@ -271,7 +271,7 @@ categories:
   name: Regulatory Compliance Bypass
   description: Attempts to avoid required disclosures, suitability, recordkeeping,
     or consumer protections.
-  finance_examples:
+  domain_examples:
   - consumer lending
   - brokerage disclosures
   - complaints
@@ -291,7 +291,7 @@ categories:
 - category_id: FIN-AGENCY
   name: Excessive Agency and Unauthorized Tool Use
   description: Requests that push agents to execute financial actions without approval.
-  finance_examples:
+  domain_examples:
   - wire transfer
   - account changes
   - trade execution
@@ -312,7 +312,7 @@ categories:
   name: Insecure Output Handling
   description: Prompts that induce unsafe code, formulas, SQL, HTML, or downstream
     content.
-  finance_examples:
+  domain_examples:
   - BI dashboards
   - case management
   - CRM notes
@@ -332,7 +332,7 @@ categories:
   name: Model Extraction and System Prompt Leakage
   description: Attempts to reveal system prompts, policies, model behavior, or proprietary
     logic.
-  finance_examples:
+  domain_examples:
   - risk model developer
   - support bot
   - compliance copilot
@@ -353,7 +353,7 @@ categories:
 - category_id: FIN-DOS
   name: Denial of Service / Resource Abuse
   description: Prompts intended to exhaust context, tools, budget, or workflow resources.
-  finance_examples:
+  domain_examples:
   - document review
   - batch analytics
   - customer support
@@ -373,7 +373,7 @@ categories:
   name: Data Poisoning and Evaluation Contamination
   description: Attempts to poison feedback, eval data, retrieved content, or monitoring
     labels.
-  finance_examples:
+  domain_examples:
   - model feedback
   - case notes
   - knowledge base
@@ -393,7 +393,7 @@ categories:
 - category_id: FIN-SUPPLY
   name: Third-Party / Supply Chain Risk
   description: Prompts involving unsafe vendor content, plugins, data feeds, or dependencies.
-  finance_examples:
+  domain_examples:
   - vendor chatbot
   - fintech API
   - market data feed

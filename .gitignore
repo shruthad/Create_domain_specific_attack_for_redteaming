@@ -46,6 +46,7 @@ google-credentials*.json
 *token*
 
 # Local generated scanner/runtime artifacts
+data/generated/
 data/generated/garak_reports/
 data/generated/smoke/
 data/generated/*.tmp

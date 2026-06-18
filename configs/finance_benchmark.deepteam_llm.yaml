@@ -1,16 +1,85 @@
 domain: banking_finance
+domain_pack: banking_finance
 dataset_version: 1.0.0
 min_per_category: 5
 max_per_category: 10
 
+use_orchestrator: true
+use_llm_generator: true
 use_deepteam: true
 use_garak: false
 
+seed_sources:
+  enabled: true
+  sources:
+    - owasp
+    - mitre_atlas
+    - garak
+  manual_yaml_path: null
+  max_items: 50
+
+garak_corpus:
+  enabled: false
+  probe_allowlist:
+    - promptinject
+    - dan
+    - encoding
+    - sysprompt_extraction
+    - leakreplay
+    - misleading
+    - web_injection
+    - latentinjection
+    - packagehallucination
+  max_raw_candidates: 5000
+  max_per_probe: 15
+  max_per_category: 20
+  max_total_seeds: 80
+  min_prompt_chars: 18
+  max_prompt_chars: 1200
+  include_data_files: true
+  include_probe_source_strings: true
+  domain_terms:
+    - banking
+    - finance
+    - customer
+    - account
+    - payment
+    - compliance
+    - document
+    - assistant
+  excluded_terms: []
+
+orchestration:
+  enabled: true
+  strategies:
+    - authority_pretext
+    - policy_exception
+  max_records: 20
+  variants_per_record: 2
+  include_multi_turn_plans: true
+  max_multi_turn_plans: 5
+
+llm_generator:
+  provider: openai
+  model: gpt-4.1-nano
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.8
+  timeout_seconds: 90
+  max_seed_records: 30
+  variants_per_seed: 3
+  max_records: 90
+  strategies:
+    - creative_roleplay
+    - hidden_policy_conflict
+    - rag_context_conflict
+    - tool_boundary_probe
+    - multi_turn_escalation
+
 deepteam:
   generation_mode: llm
-  simulator_provider: gemini
-  simulator_model: gemini-2.5-flash
-  api_key_env: GOOGLE_API_KEY
+  simulator_provider: openai
+  simulator_model: gpt-4.1-nano
+  api_key_env: OPENAI_API_KEY
   attacks_per_vulnerability_type: 1
   max_llm_records: 20
   target_purpose: >-
@@ -53,16 +122,18 @@ garak:
   include_parsed_findings: true
 
 evaluation:
-  provider: gemini
-  model: gemini-2.5-flash
+  provider: openai
+  model: gpt-4.1-nano
   max_concurrency: 1
-  delay_ms: 5000
+  delay_ms: 1000
   smoke_test_count: 1
 
 output:
   jsonl: data/exports/finance_redteam_attacks.jsonl
   promptfoo_yaml: data/exports/promptfoo_tests.yaml
   normalized_jsonl: data/generated/normalized_attacks.jsonl
+  mutations_jsonl: data/generated/mutation_variants.jsonl
+  llm_jsonl: data/generated/llm_variants.jsonl
   deepteam_jsonl: data/generated/deepteam_variants.jsonl
   garak_jsonl: data/generated/garak_patterns.jsonl
   run_metadata_json: data/generated/run_metadata.json

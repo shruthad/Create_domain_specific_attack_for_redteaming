@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .config import BenchmarkConfig, config_hash, dump_config_payload
+from .coverage import CoverageReport
 from .schema import AttackRecord
 
 
@@ -39,7 +40,13 @@ def stamp_records(records: list[AttackRecord], run: GenerationRun) -> list[Attac
     return stamped
 
 
-def write_run_metadata(config: BenchmarkConfig, run: GenerationRun, output_path: Path, record_count: int) -> None:
+def write_run_metadata(
+    config: BenchmarkConfig,
+    run: GenerationRun,
+    output_path: Path,
+    record_count: int,
+    coverage_report: CoverageReport | None = None,
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "run_id": run.run_id,
@@ -49,4 +56,6 @@ def write_run_metadata(config: BenchmarkConfig, run: GenerationRun, output_path:
         "record_count": record_count,
         "config": dump_config_payload(config),
     }
+    if coverage_report is not None:
+        payload["coverage"] = coverage_report.model_dump()
     output_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")

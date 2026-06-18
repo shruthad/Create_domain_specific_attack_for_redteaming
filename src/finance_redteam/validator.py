@@ -62,6 +62,8 @@ def validate_records(records: list[AttackRecord]) -> ValidationResult:
             errors.append(f"{prefix}: missing OWASP mapping")
         if not record.nist_ai_rmf_mapping:
             errors.append(f"{prefix}: missing NIST AI RMF mapping")
+        if not record.domain_mapping:
+            errors.append(f"{prefix}: missing domain mapping")
         if not record.risk_category:
             errors.append(f"{prefix}: missing risk category")
         if record.difficulty < 1 or record.difficulty > 5:
@@ -74,6 +76,10 @@ def validate_records(records: list[AttackRecord]) -> ValidationResult:
             errors.append(f"{prefix}: expected behavior is empty")
         if not record.unsafe_success_criteria:
             errors.append(f"{prefix}: unsafe success criteria is empty")
+        if not record.lineage:
+            errors.append(f"{prefix}: missing lineage")
+        if record.parent_attack_id and record.parent_attack_id not in record.lineage:
+            warnings.append(f"{prefix}: parent_attack_id is not present in lineage")
         secret_findings = scan_prompt_for_real_secrets(record.attack_query or record.prompt)
         if secret_findings:
             errors.extend(f"{prefix}: {finding}" for finding in secret_findings)

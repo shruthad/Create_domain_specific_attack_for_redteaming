@@ -1,54 +1,12 @@
 from __future__ import annotations
 
+from .domain_pack import FINANCE_DOMAIN_PACK, DomainPack, get_domain_pack
 from .schema import AttackRecord, SeedPrompt, TaxonomyCategory
 from .seed_prompts import CONTEXTS, PERSONAS
 
 
-FINANCE_MAPPINGS = {
-    "FIN-PI": ["Customer Support", "Agent Governance"],
-    "FIN-SID": ["Customer Data Protection", "Internal Confidentiality"],
-    "FIN-PII": ["KYC", "Customer Data Protection", "Account Servicing"],
-    "FIN-CRED": ["Secrets Management", "Payments Security"],
-    "FIN-RAG": ["Document Governance", "Research Controls"],
-    "FIN-AML": ["AML", "KYC", "Sanctions Compliance"],
-    "FIN-FRAUD": ["Fraud Detection", "Payments", "Claims"],
-    "FIN-PHISH": ["Customer Communications", "Security Awareness"],
-    "FIN-MKT": ["Market Conduct", "Trading Research"],
-    "FIN-MNPI": ["MNPI", "Insider Trading Controls"],
-    "FIN-ADVICE": ["Suitability", "Wealth Management"],
-    "FIN-BIAS": ["Fair Lending", "Credit Risk"],
-    "FIN-HALL": ["Model Risk Management", "Financial Disclosures"],
-    "FIN-REG": ["Regulatory Compliance", "Consumer Protection"],
-    "FIN-AGENCY": ["Tool Governance", "Transaction Authorization"],
-    "FIN-OUTPUT": ["Secure SDLC", "Enterprise Analytics"],
-    "FIN-EXTRACT": ["Model Governance", "IP Protection"],
-    "FIN-DOS": ["Operational Resilience", "Cost Controls"],
-    "FIN-POISON": ["Data Governance", "Evaluation Integrity"],
-    "FIN-SUPPLY": ["Third-Party Risk", "Vendor Governance"],
-}
-
-SUBCATEGORIES = {
-    "FIN-PI": "Instruction Hierarchy Override",
-    "FIN-SID": "Confidential Data Exposure",
-    "FIN-PII": "Customer PII Leakage",
-    "FIN-CRED": "Secrets and Token Exposure",
-    "FIN-RAG": "Unauthorized Retrieved Document Access",
-    "FIN-AML": "AML and KYC Control Evasion",
-    "FIN-FRAUD": "Fraud Assistance Request",
-    "FIN-PHISH": "Deceptive Communication Generation",
-    "FIN-MKT": "Manipulative Market Content",
-    "FIN-MNPI": "Material Non-Public Information Misuse",
-    "FIN-ADVICE": "Unlicensed Personalized Advice",
-    "FIN-BIAS": "Discriminatory Underwriting Logic",
-    "FIN-HALL": "Invented Financial Authority",
-    "FIN-REG": "Compliance Control Bypass",
-    "FIN-AGENCY": "Unauthorized Financial Action",
-    "FIN-OUTPUT": "Unsafe Downstream Content",
-    "FIN-EXTRACT": "System Prompt or Model Logic Leakage",
-    "FIN-DOS": "Resource Exhaustion",
-    "FIN-POISON": "Evaluation or Retrieval Contamination",
-    "FIN-SUPPLY": "Unsafe Vendor or Plugin Dependency",
-}
+FINANCE_MAPPINGS = {risk.category_id: risk.domain_mapping for risk in FINANCE_DOMAIN_PACK.risks}
+SUBCATEGORIES = {risk.category_id: risk.default_subcategory for risk in FINANCE_DOMAIN_PACK.risks}
 
 
 def _category_lookup(categories: list[TaxonomyCategory]) -> dict[str, TaxonomyCategory]:
@@ -60,7 +18,10 @@ def seeds_to_records(
     categories: list[TaxonomyCategory],
     source: str = "seed",
     start_index: int = 1,
+    domain_pack: DomainPack | None = None,
 ) -> list[AttackRecord]:
+    pack = domain_pack or get_domain_pack()
+    risk_lookup = pack.risk_by_id
     lookup = _category_lookup(categories)
     counters: dict[str, int] = {}
     records: list[AttackRecord] = []
@@ -73,12 +34,13 @@ def seeds_to_records(
         records.append(
             AttackRecord(
                 attack_id=f"{category.category_id}-{local_num:03d}",
+                domain=pack.domain_id,
                 risk_category=category.name,
-                risk_subcategory=SUBCATEGORIES.get(category.category_id, category.name),
+                risk_subcategory=risk_lookup.get(category.category_id).default_subcategory if category.category_id in risk_lookup else category.name,
                 owasp_mapping=category.owasp_mapping,
                 mitre_atlas_mapping=category.mitre_atlas_mapping,
                 nist_ai_rmf_mapping=category.nist_ai_rmf_mapping,
-                finance_domain_mapping=FINANCE_MAPPINGS.get(category.category_id, ["Banking", "Finance"]),
+                domain_mapping=risk_lookup.get(category.category_id).domain_mapping if category.category_id in risk_lookup else [pack.display_name],
                 attack_type=seed.attack_type,
                 interaction_type="multi_turn" if seed.difficulty >= 4 else "single_turn",
                 difficulty=seed.difficulty,
@@ -91,6 +53,13 @@ def seeds_to_records(
                     "lawful, privacy-preserving, compliance-safe alternatives."
                 ),
                 tags=tags,
+                source_metadata={
+                    "seed": {
+                        "seed_source": seed.seed_source,
+                        "source_reference": seed.source_reference,
+                        **seed.source_metadata,
+                    }
+                },
             )
         )
         index += 1
@@ -101,7 +70,10 @@ def generate_local_variants(
     categories: list[TaxonomyCategory],
     per_category: int = 5,
     start_index: int = 1,
+    domain_pack: DomainPack | None = None,
 ) -> list[AttackRecord]:
+    pack = domain_pack or get_domain_pack()
+    risk_lookup = pack.risk_by_id
     records: list[AttackRecord] = []
     attack_types = [
         "encoding_obfuscation",
@@ -112,8 +84,8 @@ def generate_local_variants(
     ]
     for category_index, category in enumerate(categories):
         for i in range(per_category):
-            persona = PERSONAS[(category_index + i + 3) % len(PERSONAS)]
-            context = CONTEXTS[(category_index + i + 5) % len(CONTEXTS)]
+            persona = pack.personas[(category_index + i + 3) % len(pack.personas)]
+            context = pack.contexts[(category_index + i + 5) % len(pack.contexts)]
             attack_type = attack_types[i % len(attack_types)]
             difficulty = min(5, i + 1)
             prompt = (
@@ -124,12 +96,13 @@ def generate_local_variants(
             records.append(
                 AttackRecord(
                     attack_id=f"{category.category_id}-L{start_index + i:03d}",
+                    domain=pack.domain_id,
                     risk_category=category.name,
-                    risk_subcategory=SUBCATEGORIES.get(category.category_id, category.name),
+                    risk_subcategory=risk_lookup.get(category.category_id).default_subcategory if category.category_id in risk_lookup else category.name,
                     owasp_mapping=category.owasp_mapping,
                     mitre_atlas_mapping=category.mitre_atlas_mapping,
                     nist_ai_rmf_mapping=category.nist_ai_rmf_mapping,
-                    finance_domain_mapping=FINANCE_MAPPINGS.get(category.category_id, ["Banking", "Finance"]),
+                    domain_mapping=risk_lookup.get(category.category_id).domain_mapping if category.category_id in risk_lookup else [pack.display_name],
                     attack_type=attack_type,  # type: ignore[arg-type]
                     interaction_type="multi_turn" if difficulty >= 4 else "single_turn",
                     difficulty=difficulty,
@@ -145,7 +118,7 @@ def generate_local_variants(
                         "governance, support, or compliance channels."
                     ),
                     tags=[
-                        "finance",
+                        *pack.default_tags,
                         "local-template",
                         category.category_id.lower(),
                         attack_type.replace("_", "-"),

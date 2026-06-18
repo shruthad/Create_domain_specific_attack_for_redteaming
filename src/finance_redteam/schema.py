@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 AttackType = Literal[
@@ -26,7 +26,7 @@ AttackType = Literal[
 ]
 
 InteractionType = Literal["single_turn", "multi_turn"]
-SourceType = Literal["seed", "deepteam", "garak", "local_template"]
+SourceType = Literal["seed", "deepteam", "garak", "local_template", "mutation", "orchestrator", "llm"]
 
 
 class TaxonomyCategory(BaseModel):
@@ -35,7 +35,7 @@ class TaxonomyCategory(BaseModel):
     category_id: str
     name: str
     description: str
-    finance_examples: list[str]
+    domain_examples: list[str] = Field(validation_alias=AliasChoices("domain_examples", "finance_examples"))
     owasp_mapping: list[str]
     mitre_atlas_mapping: list[str]
     nist_ai_rmf_mapping: list[str]
@@ -53,19 +53,23 @@ class SeedPrompt(BaseModel):
     expected_behavior: str
     unsafe_success_criteria: str
     tags: list[str] = Field(default_factory=list)
+    seed_source: str = "domain_pack"
+    source_reference: str | None = None
+    source_metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AttackRecord(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     attack_id: str
-    domain: Literal["banking_finance"] = "banking_finance"
+    domain: str = "banking_finance"
     risk_category: str
     risk_subcategory: str
     owasp_mapping: list[str]
     mitre_atlas_mapping: list[str]
     nist_ai_rmf_mapping: list[str]
-    finance_domain_mapping: list[str]
+    domain_mapping: list[str] | None = None
+    finance_domain_mapping: list[str] | None = None
     attack_type: AttackType
     interaction_type: InteractionType
     difficulty: int = Field(ge=1, le=5)
@@ -84,22 +88,36 @@ class AttackRecord(BaseModel):
     generator_config_hash: str = "manual"
     source_metadata: dict[str, Any] = Field(default_factory=dict)
     review_flags: list[str] = Field(default_factory=list)
+    parent_attack_id: str | None = None
+    lineage: list[str] = Field(default_factory=list)
+    mutation_strategy: str | None = None
+    mutation_depth: int = Field(default=0, ge=0)
+    orchestration_phase: str | None = None
+    coverage_trace: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def populate_attack_query(self) -> "AttackRecord":
+    def populate_derived_fields(self) -> "AttackRecord":
         if self.attack_query and self.attack_query.strip():
             self.attack_query = self.attack_query.strip()
-            return self
-
-        prompt = self.prompt.strip()
-        if "Evaluation input:" in prompt:
-            query = prompt.split("Evaluation input:", 1)[1].strip()
-            query = query.split("Expected behavior remains", 1)[0].strip()
-            self.attack_query = query.rstrip(". ")
-        elif prompt.startswith("Garak coverage pattern for defensive evaluation:"):
-            self.attack_query = prompt.split(":", 1)[1].strip()
         else:
-            self.attack_query = prompt
+            prompt = self.prompt.strip()
+            if "Evaluation input:" in prompt:
+                query = prompt.split("Evaluation input:", 1)[1].strip()
+                query = query.split("Expected behavior remains", 1)[0].strip()
+                self.attack_query = query.rstrip(". ")
+            elif prompt.startswith("Garak coverage pattern for defensive evaluation:"):
+                self.attack_query = prompt.split(":", 1)[1].strip()
+            else:
+                self.attack_query = prompt
+
+        if self.domain_mapping is None and self.finance_domain_mapping is not None:
+            self.domain_mapping = list(self.finance_domain_mapping)
+        if self.finance_domain_mapping is None and self.domain == "banking_finance" and self.domain_mapping is not None:
+            self.finance_domain_mapping = list(self.domain_mapping)
+        if not self.lineage:
+            self.lineage = [self.attack_id]
+        elif self.attack_id not in self.lineage:
+            self.lineage = [*self.lineage, self.attack_id]
         return self
 
     @field_validator(
@@ -124,11 +142,20 @@ class AttackRecord(BaseModel):
         "owasp_mapping",
         "mitre_atlas_mapping",
         "nist_ai_rmf_mapping",
-        "finance_domain_mapping",
         "tags",
     )
     @classmethod
     def non_empty_list(cls, value: list[str]) -> list[str]:
+        cleaned = [item.strip() for item in value if item and item.strip()]
+        if not cleaned:
+            raise ValueError("list field must contain at least one value")
+        return cleaned
+
+    @field_validator("domain_mapping", "finance_domain_mapping")
+    @classmethod
+    def optional_non_empty_list(cls, value: list[str] | None) -> list[str] | None:
+        if value is None:
+            return value
         cleaned = [item.strip() for item in value if item and item.strip()]
         if not cleaned:
             raise ValueError("list field must contain at least one value")

@@ -1,5 +1,7 @@
 {
   "scripts": {
+    "eval:openai": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --max-concurrency 1 --delay 1000 --no-cache",
+    "eval:openai:smoke": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --filter-first-n 1 --max-concurrency 1 --delay 1000 --no-cache",
     "eval:gemini": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --max-concurrency 1 --delay 1000 --no-cache",
     "eval:gemini:smoke": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --filter-first-n 1 --max-concurrency 1 --delay 5000 --no-cache",
     "eval:gemini:smoke5": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --filter-first-n 5 --max-concurrency 1 --delay 10000 --no-cache",

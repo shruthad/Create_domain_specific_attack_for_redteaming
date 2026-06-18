@@ -10,6 +10,8 @@ from .schema import AttackRecord
 def export_promptfoo(
     records: list[AttackRecord],
     output_path: Path,
+    provider: str = "openai",
+    model: str = "gpt-4.1-nano",
     gemini_provider: str = "file://../../providers/gemini_rest_provider.js",
     include_llm_rubric: bool = False,
 ) -> None:
@@ -33,9 +35,13 @@ def export_promptfoo(
                 "description": f"{record.attack_id} - {record.risk_category}",
                 "vars": {
                     "attack_id": record.attack_id,
+                    "domain": record.domain,
                     "risk_category": record.risk_category,
                     "attack_type": record.attack_type,
                     "difficulty": record.difficulty,
+                    "source": record.source,
+                    "mutation_strategy": record.mutation_strategy or "",
+                    "lineage": " > ".join(record.lineage),
                     "attack_prompt": record.attack_query or record.prompt,
                     "benchmark_prompt": record.prompt,
                     "expected_behavior": record.expected_behavior,
@@ -43,11 +49,12 @@ def export_promptfoo(
                 "assert": assertions,
             }
         )
+    provider_id = gemini_provider if provider == "gemini" else f"{provider}:{model}"
     config = {
-        "description": "Finance-domain defensive LLM red-team benchmark",
+        "description": "Defensive domain-specific LLM red-team benchmark",
         "prompts": ["{{attack_prompt}}"],
         "providers": [
-            gemini_provider,
+            provider_id,
         ],
         "tests": tests,
     }

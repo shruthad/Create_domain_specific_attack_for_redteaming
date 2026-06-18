@@ -26,6 +26,13 @@ def test_promptfoo_yaml_export(tmp_path):
     export_promptfoo(_records(), path)
     data = yaml.safe_load(path.read_text())
     assert data["tests"][0]["vars"]["attack_id"]
+    assert data["providers"][0] == "openai:gpt-4.1-nano"
+
+
+def test_promptfoo_yaml_export_can_target_gemini(tmp_path):
+    path = tmp_path / "promptfoo.yaml"
+    export_promptfoo(_records(), path, provider="gemini", model="gemini-2.5-flash")
+    data = yaml.safe_load(path.read_text())
     assert data["providers"][0] == "file://../../providers/gemini_rest_provider.js"
 
 
