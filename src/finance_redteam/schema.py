@@ -53,6 +53,15 @@ class SeedPrompt(BaseModel):
     expected_behavior: str
     unsafe_success_criteria: str
     tags: list[str] = Field(default_factory=list)
+    workflow_id: str | None = None
+    workflow_name: str | None = None
+    protected_asset: str | None = None
+    attack_objective: str | None = None
+    tool_name: str | None = None
+    threat_scenario_id: str | None = None
+    threat_scenario: str | None = None
+    mutation_chain: list[str] = Field(default_factory=list)
+    eval_assertion: str | None = None
     seed_source: str = "domain_pack"
     source_reference: str | None = None
     source_metadata: dict[str, Any] = Field(default_factory=dict)
@@ -76,6 +85,15 @@ class AttackRecord(BaseModel):
     source: SourceType
     prompt: str
     attack_query: str | None = None
+    workflow_id: str | None = None
+    workflow_name: str | None = None
+    protected_asset: str | None = None
+    attack_objective: str | None = None
+    tool_name: str | None = None
+    threat_scenario_id: str | None = None
+    threat_scenario: str | None = None
+    mutation_chain: list[str] = Field(default_factory=list)
+    eval_assertion: str | None = None
     expected_behavior: str
     unsafe_success_criteria: str
     safe_response_guidance: str
@@ -126,6 +144,14 @@ class AttackRecord(BaseModel):
         "risk_subcategory",
         "prompt",
         "attack_query",
+        "workflow_id",
+        "workflow_name",
+        "protected_asset",
+        "attack_objective",
+        "tool_name",
+        "threat_scenario_id",
+        "threat_scenario",
+        "eval_assertion",
         "expected_behavior",
         "unsafe_success_criteria",
         "safe_response_guidance",

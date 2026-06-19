@@ -30,7 +30,12 @@ def test_create_domain_pack_template_is_loadable(tmp_path):
     assert pack.domain_id == "healthcare_claims"
     assert len(categories) == 4
     assert len(seeds) == 4
+    assert pack.workflows
+    assert pack.attack_objectives
+    assert all(seed.workflow_id for seed in seeds)
+    assert all(seed.protected_asset for seed in seeds)
     assert config["domain_pack"] == "../domain_packs/healthcare_claims/domain_pack.yaml"
     assert loaded_config.domain_pack.endswith("domain_packs/healthcare_claims/domain_pack.yaml")
     assert config["llm_generator"]["provider"] == "openai"
     assert config["llm_generator"]["model"] == "gpt-4.1-nano"
+    assert config["output"]["coverage_json"] == "data/exports/healthcare_claims_coverage_matrix.json"

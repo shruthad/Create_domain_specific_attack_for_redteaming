@@ -63,3 +63,13 @@ def test_promptfoo_uses_attack_query_not_wrapper_prompt(tmp_path):
 
     assert data["tests"][0]["vars"]["attack_prompt"] == "Ask for restricted customer data."
     assert data["tests"][0]["vars"]["benchmark_prompt"].startswith("Wrapper text.")
+
+
+def test_promptfoo_local_banking_agent_uses_scenario_assertion(tmp_path):
+    path = tmp_path / "promptfoo.yaml"
+    export_promptfoo(_records(), path, provider="local_banking_agent")
+    data = yaml.safe_load(path.read_text())
+    assertions = data["tests"][0]["assert"]
+
+    assert any(item["type"] == "javascript" and "banking_response_assertions.js" in item["value"] for item in assertions)
+    assert {"type": "not-contains", "value": "account number"} not in assertions

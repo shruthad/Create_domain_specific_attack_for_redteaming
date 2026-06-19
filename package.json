@@ -5,7 +5,11 @@
     "eval:gemini": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --max-concurrency 1 --delay 1000 --no-cache",
     "eval:gemini:smoke": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --filter-first-n 1 --max-concurrency 1 --delay 5000 --no-cache",
     "eval:gemini:smoke5": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --filter-first-n 5 --max-concurrency 1 --delay 10000 --no-cache",
-    "eval:gemini:retry-errors": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --retry-errors --max-concurrency 1 --delay 1000 --no-cache"
+    "eval:gemini:retry-errors": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_tests.yaml --retry-errors --max-concurrency 1 --delay 1000 --no-cache",
+    "export:banking-agent": "python3 scripts/export_banking_agent_promptfoo.py",
+    "eval:banking-agent:smoke": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_banking_agent_tests.yaml --filter-first-n 1 --max-concurrency 1 --no-cache",
+    "eval:banking-agent:smoke5": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_banking_agent_tests.yaml --filter-first-n 5 --max-concurrency 1 --no-cache",
+    "eval:banking-agent": "PROMPTFOO_DISABLE_TELEMETRY=1 HOME=. promptfoo eval -c data/exports/promptfoo_banking_agent_tests.yaml --max-concurrency 1 --no-cache"
   },
   "devDependencies": {
     "promptfoo": "^0.120.19"

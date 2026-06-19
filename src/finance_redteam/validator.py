@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from .attack_query_builder import assess_attack_query_quality
 from .schema import AttackRecord
 
 
@@ -86,4 +87,9 @@ def validate_records(records: list[AttackRecord]) -> ValidationResult:
         harm_findings = scan_prompt_for_operational_harm(record.attack_query or record.prompt)
         if harm_findings:
             warnings.extend(f"{prefix}: {finding}" for finding in harm_findings)
+        quality = assess_attack_query_quality(record.attack_query or record.prompt)
+        if quality.is_meta:
+            errors.append(f"{prefix}: prompt contains benchmark/meta language: {quality.flags}")
+        elif quality.score < 70:
+            warnings.append(f"{prefix}: weak direct attack prompt quality: score={quality.score}, flags={quality.flags}")
     return ValidationResult(valid=not errors, errors=errors, review_warnings=warnings)

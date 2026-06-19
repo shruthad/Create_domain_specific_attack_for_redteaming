@@ -1,5 +1,6 @@
 domain: banking_finance
 domain_pack: banking_finance
+agent_profile_path: agent_profiles/banking_support_agent.yaml
 dataset_version: 1.0.0
 min_per_category: 5
 max_per_category: 10
@@ -8,7 +9,7 @@ max_per_category: 10
 # Turn these on only when the optional tools are installed and you want expansion.
 use_orchestrator: true
 use_llm_generator: false
-use_deepteam: false
+use_deepteam: true
 use_garak: false
 
 seed_sources:
@@ -97,16 +98,32 @@ deepteam:
   vulnerabilities:
     - prompt_injection
     - pii_leakage
+    - credential_leakage
     - rag_exfiltration
+    - tool_misuse
+    - unsafe_financial_advice
+  # Used when generation_mode=llm. These are DeepTeam's real attack enhancement modules.
+  attack_methods:
+    - prompt_injection
+    - roleplay
+    - authority_escalation
+    - system_override
+    - input_bypass
+    - context_poisoning
+    - embedded_instruction_json
+    - goal_redirection
+    - permission_escalation
   attack_types:
     - jailbreak
     - developer_override
     - rag_exfiltration
     - data_extraction
+    - tool_misuse
+    - system_prompt_extraction
   risk_categories: []
   min_difficulty: null
   max_difficulty: 4
-  max_seed_records: 25
+  max_seed_records: 40
   variants_per_seed: 2
   include_original_attack_type: true
 

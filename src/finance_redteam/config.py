@@ -8,6 +8,7 @@ from typing import Any
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
+from .agent_profile import DEFAULT_AGENT_PROFILE_PATH
 from .deepteam_adapter import DeepTeamExpansionConfig
 from .garak_adapter import GarakExpansionConfig
 from .garak_corpus import DEFAULT_GARAK_PROBE_ALLOWLIST, GarakCorpusConfig
@@ -112,6 +113,7 @@ class OutputConfig(BaseModel):
     deepteam_jsonl: Path = Path("data/generated/deepteam_variants.jsonl")
     garak_jsonl: Path = Path("data/generated/garak_patterns.jsonl")
     run_metadata_json: Path = Path("data/generated/run_metadata.json")
+    coverage_json: Path = Path("data/exports/coverage_matrix.json")
 
 
 class BenchmarkConfig(BaseModel):
@@ -119,6 +121,7 @@ class BenchmarkConfig(BaseModel):
 
     domain: str = "banking_finance"
     domain_pack: str = "banking_finance"
+    agent_profile_path: Path | None = DEFAULT_AGENT_PROFILE_PATH
     dataset_version: str = "1.0.0"
     min_per_category: int = Field(default=5, ge=1)
     max_per_category: int = Field(default=10, ge=1)
@@ -145,6 +148,12 @@ def load_benchmark_config(path: Path = DEFAULT_CONFIG_PATH) -> BenchmarkConfig:
         if not domain_pack_path.is_absolute():
             domain_pack_path = (path.parent / domain_pack_path).resolve()
         data["domain_pack"] = str(domain_pack_path)
+    agent_profile_path = data.get("agent_profile_path")
+    if isinstance(agent_profile_path, str):
+        profile_path = Path(agent_profile_path)
+        if not profile_path.is_absolute():
+            profile_path = (path.parent / profile_path).resolve()
+        data["agent_profile_path"] = str(profile_path)
     return BenchmarkConfig.model_validate(data)
 
 

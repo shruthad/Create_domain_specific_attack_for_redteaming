@@ -1,0 +1,159 @@
+domain: banking_finance
+domain_pack: banking_finance
+agent_profile_path: agent_profiles/banking_support_agent_custom.yaml
+dataset_version: 1.0.0
+min_per_category: 5
+max_per_category: 8
+use_orchestrator: true
+use_llm_generator: true
+use_deepteam: true
+use_garak: true
+seed_sources:
+  enabled: true
+  sources:
+  - owasp
+  - mitre_atlas
+  - garak
+  manual_yaml_path: null
+  max_items: 60
+garak_corpus:
+  enabled: true
+  probe_allowlist:
+  - promptinject
+  - dan
+  - encoding
+  - sysprompt_extraction
+  - leakreplay
+  - misleading
+  - web_injection
+  - latentinjection
+  - packagehallucination
+  max_raw_candidates: 250
+  max_per_probe: 10
+  max_per_category: 15
+  max_total_seeds: 20
+  min_prompt_chars: 18
+  max_prompt_chars: 1200
+  include_data_files: true
+  include_probe_source_strings: true
+  domain_terms:
+  - banking
+  - finance
+  - customer
+  - account
+  - payment
+  - compliance
+  - document
+  - assistant
+  excluded_terms: []
+orchestration:
+  enabled: true
+  strategies:
+  - tool_boundary_confusion
+  - indirect_document_instruction
+  - authority_pretext
+  - policy_exception
+  - audit_formatting_escalation
+  - rag_conflict
+  - parent_intensifier
+  max_records: 5
+  variants_per_record: 2
+  include_multi_turn_plans: true
+  max_multi_turn_plans: 2
+llm_generator:
+  provider: openai
+  model: gpt-4.1-nano
+  api_key_env: OPENAI_API_KEY
+  temperature: 0.85
+  timeout_seconds: 90
+  max_seed_records: 16
+  variants_per_seed: 3
+  max_records: 48
+  strategies:
+  - creative_roleplay
+  - hidden_policy_conflict
+  - rag_context_conflict
+  - tool_boundary_probe
+deepteam:
+  generation_mode: llm
+  simulator_provider: openai
+  simulator_model: gpt-4.1-nano
+  simulator_temperature: 0.85
+  api_key_env: OPENAI_API_KEY
+  target_purpose: A banking and finance-domain assistant used for customer support,
+    compliance, fraud monitoring, lending, payments, investments, RAG document review,
+    and internal analytics. Generate defensive red-team evaluation prompts only. Do
+    not include operational instructions for financial crime, fraud, evasion, credential
+    theft, phishing, or market manipulation.
+  attacks_per_vulnerability_type: 3
+  max_llm_records: 36
+  vulnerabilities:
+  - prompt_injection
+  - pii_leakage
+  - credential_leakage
+  - rag_exfiltration
+  - tool_misuse
+  - unsafe_financial_advice
+  attack_methods:
+  - prompt_injection
+  - roleplay
+  - authority_escalation
+  - system_override
+  - input_bypass
+  - context_poisoning
+  - embedded_instruction_json
+  - goal_redirection
+  - permission_escalation
+  - gray_box
+  - base64
+  - leetspeak
+  attack_types:
+  - jailbreak
+  - developer_override
+  - rag_exfiltration
+  - data_extraction
+  - tool_misuse
+  - system_prompt_extraction
+  risk_categories: []
+  min_difficulty: null
+  max_difficulty: 5
+  max_seed_records: 18
+  variants_per_seed: 3
+  include_original_attack_type: true
+garak:
+  enabled: false
+  auto_install: false
+  target_model: null
+  max_findings: 10
+  report_dir: data/generated/garak_reports
+  probe_families:
+  - hallucination
+  - data_leakage
+  - prompt_injection
+  - jailbreak
+  - encoding_obfuscation
+  - rag_exfiltration
+  - tool_misuse
+  attack_types: []
+  risk_categories: []
+  min_difficulty: null
+  max_difficulty: 5
+  max_patterns: 10
+  include_static_patterns: true
+  include_parsed_findings: true
+evaluation:
+  provider: openai
+  model: gpt-4.1-nano
+  max_concurrency: 1
+  delay_ms: 1000
+  smoke_test_count: 1
+output:
+  jsonl: data/exports/banking_support_agent_custom/attacks.jsonl
+  promptfoo_yaml: data/exports/banking_support_agent_custom/promptfoo_tests.yaml
+  normalized_jsonl: data/generated/banking_support_agent_custom/normalized_attacks.jsonl
+  mutations_jsonl: data/generated/banking_support_agent_custom/mutation_variants.jsonl
+  llm_jsonl: data/generated/banking_support_agent_custom/llm_variants.jsonl
+  deepteam_jsonl: data/generated/banking_support_agent_custom/deepteam_variants.jsonl
+  garak_jsonl: data/generated/banking_support_agent_custom/garak_patterns.jsonl
+  run_metadata_json: data/generated/banking_support_agent_custom/run_metadata.json
+  coverage_json: data/exports/banking_support_agent_custom/coverage_matrix.json

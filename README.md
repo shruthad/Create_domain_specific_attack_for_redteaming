@@ -16,21 +16,35 @@ The main evaluation config output is:
 data/exports/promptfoo_tests.yaml
 ```
 
+The main coverage report output is:
+
+```text
+data/exports/coverage_matrix.json
+```
+
 ## What This Project Does
 
 The project builds a domain-specific red-team dataset through this pipeline:
 
 ```text
-Domain pack
--> risk taxonomy
--> safe seed prompts
+Agent profile / problem statement
+-> system prompt summary, use case, tool access, dummy records, and policy boundaries
+-> domain pack
+-> workflows, protected assets, tools, and attack objectives
+-> policies: allowed actions and forbidden actions
+-> threat scenarios
+-> mutation chains
+-> eval assertions
+-> risk taxonomy mappings
+-> first-person realistic attacker seed prompts
+-> workflow-specific seed prompts
 -> framework-derived seed sources
 -> structured benchmark records
 -> mutation strategies
 -> multi-turn planning
 -> optional direct LLM adversarial generation
--> optional DeepTeam expansion
--> optional Garak coverage patterns
+-> optional DeepTeam expansion using scenario context
+-> optional Garak built-in corpus mining and scanner-style coverage patterns
 -> normalization
 -> deduplication
 -> lineage and coverage tracing
@@ -38,6 +52,32 @@ Domain pack
 -> JSONL export
 -> Promptfoo evaluation
 ```
+
+The key production shift is that prompts are generated from the target agent's
+problem statement and compiled workflow objects, not only from generic category
+names:
+
+```text
+System prompt / agent use case / tool access / dummy data
+-> domain workflow
+-> assets / data / actions
+-> policy boundaries
+-> threat scenario
+-> attacker objective
+-> mutation chain
+-> eval assertion
+```
+
+For example, a finance prompt can now be generated from the banking support
+agent profile, the workflow `wire_transfer_approval`, protected asset
+`beneficiary details`, tool surface `payment_approval_queue`, attacker objective
+`Trigger Unauthorized Financial Action`, mutation chain, and the exact assertion
+that the target model must satisfy.
+
+The exported `prompt` is the exact user-facing attack message sent to the target
+model. Benchmark narration, source lineage, scenario details, Garak provenance,
+and DeepTeam/LLM mutation rationale are stored in metadata instead of being sent
+as the attack prompt.
 
 The default workflow is local and deterministic. It does not require paid APIs.
 
@@ -47,15 +87,18 @@ Optional integrations:
 - DeepTeam: expands seed prompts into adversarial variations.
 - Garak: adds scanner-style coverage patterns.
 - Promptfoo: evaluates generated attacks against a target model such as OpenAI or Gemini.
+- Local banking demo agent: evaluates attacks against a deterministic synthetic banking assistant with a fake customer database.
 
 Core reusable modules:
 
-- Domain packs: package taxonomy, seed guidance, personas, contexts, mappings, and expected behavior for a domain.
+- Domain packs: package taxonomy, workflow definitions, protected assets, tool/action surfaces, attack objectives, personas, contexts, mappings, and expected behavior for a domain.
 - Seed source ingestion: imports OWASP, MITRE ATLAS-style, Garak-style, and manual YAML source signals into domain-adapted seed prompts.
-- Mutation strategies: create controlled prompt variations such as authority pretext, policy exception, indirect document instruction, and obfuscation framing.
+- Workflow seed builder: creates at least one rich seed per domain workflow so the benchmark covers real business journeys, not only abstract risk categories.
+- Threat scenario compiler: converts workflows, assets, allowed/forbidden actions, objectives, tools, and categories into concrete evaluation scenarios.
+- Mutation orchestrator: acts as the generation brain by extending each scenario's mutation chain with strategies such as authority pretext, policy exception, indirect document instruction, and obfuscation framing.
 - Multi-turn planner: creates staged interactions as first-class records.
 - Direct LLM generator: uses a configured model to generate stronger natural-language attack variants with lineage tracking.
-- Coverage tracing: records source, lineage, mutation strategy, attack type, category, and coverage counts for each exported attack.
+- Coverage tracing: records source, lineage, mutation strategy, attack type, category, workflow, protected asset, attack objective, and coverage counts for each exported attack.
 
 ## Defensive-Use Notice
 
@@ -79,10 +122,13 @@ pyproject.toml
 configs/
   finance_benchmark.yaml
   finance_benchmark.deepteam_llm.yaml
+  agent_profiles/
+    banking_support_agent.yaml
 
 notebooks/
   01_create_expand_dataset.ipynb
   02_evaluate_attacks_gemini.ipynb
+  03_create_domain_usecase_dataset.ipynb
 
 src/finance_redteam/
   domain_pack.py
@@ -167,8 +213,13 @@ Typical behavior:
 - Creates the baseline finance red-team benchmark
 - Imports OWASP, MITRE ATLAS-style, and Garak-style seed candidates
 - Runs local mutation strategies and multi-turn planning
+- Adds banking workflow, protected-asset, tool, and attack-objective metadata
+- Uses `configs/agent_profiles/banking_support_agent.yaml` as the concrete
+  target-agent problem statement
+- Exports first-person target-ready attack prompts, not third-person benchmark
+  descriptions
 - Adds lineage and coverage traces
-- Exports JSONL and Promptfoo YAML
+- Exports JSONL, Promptfoo YAML, and a workflow-aware coverage matrix
 
 ### Live LLM And DeepTeam Config
 
@@ -187,6 +238,26 @@ This requires:
 
 This config is intended for stronger benchmark creation when API access is available. It prioritizes prompt quality and adversarial variety over offline reproducibility.
 
+### Agent Profile
+
+```text
+configs/agent_profiles/banking_support_agent.yaml
+```
+
+This file is the target-agent problem statement. It describes:
+
+- what the banking agent does;
+- the system-prompt boundaries in summarized form;
+- available tool/action surfaces;
+- protected data and assets;
+- allowed and forbidden actions;
+- dummy IDs and records used safely in prompts;
+- realistic business pretexts attackers may use.
+
+To adapt the utility for another banking agent or another domain, update or
+replace this profile first. Then update the domain pack only when the domain's
+workflows, assets, or risk taxonomy are different.
+
 ## Notebook 01: Create And Expand Dataset
 
 Open:
@@ -201,23 +272,95 @@ The notebook:
 
 1. Loads the selected YAML config.
 2. Loads the finance domain pack.
-3. Generates the finance taxonomy and seed prompts.
-4. Imports configured OWASP, MITRE ATLAS-style, Garak-style, or manual seed sources.
-5. Converts prompts into structured benchmark records.
-6. Applies configured mutation strategies.
-7. Creates multi-turn plans.
-8. Optionally generates stronger direct LLM variants.
-9. Optionally expands records with DeepTeam.
-10. Optionally adds Garak coverage patterns.
-11. Normalizes, deduplicates, and traces coverage.
-12. Validates schema and safety rules.
-13. Exports JSONL and Promptfoo YAML.
+3. Inspects workflows, protected assets, tools, and attack objectives.
+4. Generates the finance taxonomy, category seeds, and workflow-specific seeds.
+5. Imports configured OWASP, MITRE ATLAS-style, Garak-style, or manual seed sources.
+6. Converts prompts into structured benchmark records.
+7. Applies workflow-aware mutation strategies.
+8. Creates multi-turn plans.
+9. Optionally generates stronger direct LLM variants using workflow context.
+10. Optionally expands records with DeepTeam using scenario context.
+11. Optionally adds Garak coverage patterns.
+12. Normalizes, deduplicates, and traces coverage.
+13. Validates schema and safety rules.
+14. Exports JSONL, Promptfoo YAML, and coverage matrix JSON.
 
 Default outputs:
 
 ```text
 data/exports/finance_redteam_attacks.jsonl
 data/exports/promptfoo_tests.yaml
+data/exports/coverage_matrix.json
+```
+
+## Notebook 03: Create A Domain Or Use-Case Specific Dataset
+
+Open:
+
+```text
+notebooks/03_create_domain_usecase_dataset.ipynb
+```
+
+Use this notebook when you want to generate attacks for a specific model, agent,
+or business use case. It starts from an agent problem statement: purpose, system
+prompt summary, users, tools, protected assets, allowed actions, forbidden
+actions, dummy records, and realistic pretexts.
+
+The notebook can either:
+
+- use the existing banking/finance domain pack with a custom agent profile; or
+- create a starter domain-pack template for a new domain, then build attacks
+  from that customized pack.
+
+It writes use-case-specific outputs under:
+
+```text
+data/exports/<profile_id>/attacks.jsonl
+data/exports/<profile_id>/promptfoo_tests.yaml
+data/exports/<profile_id>/coverage_matrix.json
+```
+
+## Local Synthetic Banking Agent
+
+For evaluation without OpenAI, Gemini, or real banking systems, the repo includes
+a local deterministic target agent:
+
+```text
+src/finance_redteam/banking_agent.py
+providers/local_banking_agent_provider.js
+data/dummy_bank/customers.json
+```
+
+This target has:
+
+- a banking safety system prompt
+- a tiny synthetic customer database
+- deterministic refusal behavior for unsafe requests
+- no real customer data
+- no real financial actions or external tools
+
+Export Promptfoo config for the local banking agent:
+
+```bash
+npm run export:banking-agent
+```
+
+Run a smoke eval:
+
+```bash
+npm run eval:banking-agent:smoke
+```
+
+Run five test cases:
+
+```bash
+npm run eval:banking-agent:smoke5
+```
+
+Run the full local eval:
+
+```bash
+npm run eval:banking-agent
 ```
 
 ## Notebook 02: Evaluate Against A Target Model

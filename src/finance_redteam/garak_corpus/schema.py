@@ -48,6 +48,11 @@ class GarakCorpusConfig:
             "weapon",
             "bomb",
             "kill all humans",
+            "violent content",
+            "explicit",
+            "celebrity",
+            "sexual",
+            "self-harm",
         ]
     )
 

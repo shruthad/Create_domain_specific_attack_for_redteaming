@@ -1,5 +1,6 @@
 domain: banking_finance
 domain_pack: banking_finance
+agent_profile_path: agent_profiles/banking_support_agent.yaml
 dataset_version: 1.0.0
 min_per_category: 5
 max_per_category: 10
@@ -98,6 +99,18 @@ deepteam:
     - unsafe_financial_advice
     - tool_misuse
     - market_manipulation
+  attack_methods:
+    - prompt_injection
+    - roleplay
+    - authority_escalation
+    - system_override
+    - input_bypass
+    - context_poisoning
+    - embedded_instruction_json
+    - goal_redirection
+    - permission_escalation
+    - gray_box
+    - multilingual
   attack_types: []
   risk_categories: []
   min_difficulty: null
@@ -137,3 +150,4 @@ output:
   deepteam_jsonl: data/generated/deepteam_variants.jsonl
   garak_jsonl: data/generated/garak_patterns.jsonl
   run_metadata_json: data/generated/run_metadata.json
+  coverage_json: data/exports/coverage_matrix.json
